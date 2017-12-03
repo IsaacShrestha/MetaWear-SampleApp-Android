@@ -86,6 +86,7 @@ import okhttp3.Route;
 
 import static android.content.ContentValues.TAG;
 import static android.view.View.GONE;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertTrue;
 
@@ -115,13 +116,13 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
     }
 
-    public void postRequesttoServer(String str){
+    public void postRequesttoServer(String celsiusData){
         OkHttpClient okHttpClient = new OkHttpClient();
 
         //Creating JSON Object to send to server
        RequestBody body = new FormBody.Builder()
                .add("time", "10")
-               .add("celsius", "32")
+               .add("celsius", celsiusData)
                .build();
        //requests here
         Request request = new Request.Builder()
@@ -157,8 +158,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Calling postRequestService
-        postRequesttoServer("Post this data");
+
 
 
 
@@ -224,6 +224,8 @@ public class TemperatureFragment extends SingleDataSensorFragment {
                     gpioDataPin = Byte.valueOf(s.toString());
                     view.findViewById(R.id.sample_control).setEnabled(true);
                     extThermWrapper.setError(null);
+
+
                 } catch (Exception e) {
                     view.findViewById(R.id.sample_control).setEnabled(false);
                     extThermWrapper.setError(e.getLocalizedMessage());
@@ -250,6 +252,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
                     gpioPulldownPin = Byte.valueOf(s.toString());
                     view.findViewById(R.id.sample_control).setEnabled(true);
                     extThermWrapper.setError(null);
+
                 } catch (Exception e) {
                     view.findViewById(R.id.sample_control).setEnabled(false);
                     extThermWrapper.setError(e.getLocalizedMessage());
@@ -309,12 +312,16 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         }
         tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
             final Float celsius = data.value(Float.class);
+            //System.out.println("output #celsius = "+ celsius);
+            //Calling postRequestService
+            postRequesttoServer(celsius.toString());
 
             LineData chartData = chart.getData();
 
             if (startTime == -1) {
                 chartData.addXValue("0");
                 startTime = System.currentTimeMillis();
+
             } else {
                 chartData.addXValue(String.format(Locale.US, "%.2f", sampleCount * samplingPeriod));
             }
