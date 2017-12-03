@@ -33,6 +33,7 @@ package com.mbientlab.metawear.app;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -45,10 +46,24 @@ import com.mbientlab.metawear.app.help.HelpOptionAdapter;
 import com.mbientlab.metawear.module.BarometerBosch;
 import com.mbientlab.metawear.module.BarometerBosch.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by etsai on 8/22/2015.
@@ -66,8 +81,72 @@ public class BarometerFragment extends SensorFragment {
         super(R.string.navigation_fragment_barometer, R.layout.fragment_sensor, 80000, 110000);
         altitudeMin= -300;
         altitudeMax= 1500;
+        postRequesttoServer("Hello");
     }
 
+    //okHttp post code starts from here
+    public static final MediaType MEDIA_TYPE =
+            MediaType.parse("application/vnd.api+json");
+
+    public void postRequesttoServer(String str){
+
+        //okHttp requests here
+        OkHttpClient okHttpClient = new OkHttpClient();
+        JSONObject postdata = new JSONObject();
+       // JSONObject data = new JSONObject();
+        try {
+            //data.put("eventtype",str);
+            postdata.put("time", "Hello" );
+            postdata.put("celsius", "Hello" );
+        } catch(JSONException e){
+            // TODO Auto-generated catch block
+            System.out.println("1st exception");
+            e.printStackTrace();
+        }
+
+        RequestBody body = RequestBody.create(MEDIA_TYPE,
+                postdata.toString());
+
+        Log.i(TAG, String.valueOf(body));
+        //initialize requests here
+        Request request = new Request.Builder()
+                .url("http://192.168.0.3:8000/api/temperature")
+                .post(body)
+                .build();
+
+        //execute requests here
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                //String mMessage = e.getMessage().toString();
+                Log.i(TAG, e.getMessage());
+                System.out.println("Second Error");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String mMessage = response.body().string();
+                Log.i(TAG, "The response body =" + mMessage);
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject json = new JSONObject(mMessage);
+                        final String serverResponse = json.getString("Your Index");
+
+                    } catch (Exception e){
+                        System.out.println("Third exception: Failed JSON Object");
+                        Log.i(TAG, e.getMessage());
+                    }
+                } else {
+                    System.out.println("response failed");
+                    Log.i(TAG, response.body().string());
+                }
+
+            }
+
+
+        });
+    }
+    //okHttp post code ends here
     @Override
     protected void boardReady() throws UnsupportedModuleException {
         barometer = mwBoard.getModuleOrThrow(BarometerBosch.class);

@@ -47,12 +47,23 @@ import com.mbientlab.metawear.app.help.HelpOptionAdapter;
 import com.mbientlab.metawear.module.AmbientLightLtr329;
 import com.mbientlab.metawear.module.AmbientLightLtr329.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.Buffer;
 import java.util.Locale;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by etsai on 8/22/2015.
  */
 public class AmbientLightFragment extends SingleDataSensorFragment {
+
     private static final int LIGHT_SAMPLE_PERIOD= 50;
 
     private int sensorGainIndex= 0;
@@ -61,6 +72,7 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
 
     public AmbientLightFragment() {
         super(R.string.navigation_fragment_light, "illuminance", R.layout.fragment_sensor_config_spinner, LIGHT_SAMPLE_PERIOD / 1000.f, 1, 64000f);
+
     }
 
     @Override
