@@ -32,6 +32,7 @@
 package com.mbientlab.metawear.app;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -59,6 +60,16 @@ import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import static android.content.ContentValues.TAG;
+
 /**
  * Created by etsai on 8/22/2015.
  */
@@ -74,6 +85,45 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
         super(R.string.navigation_fragment_light, "illuminance", R.layout.fragment_sensor_config_spinner, LIGHT_SAMPLE_PERIOD / 1000.f, 1, 64000f);
 
     }
+
+    //okHttp request/response to server begins...
+    public void postRequesttoServer(String illuminanceData){
+        OkHttpClient okHttpClient = new OkHttpClient();
+
+        //Creating JSON Object to send to server
+        RequestBody body = new FormBody.Builder()
+                .add("illuminance", illuminanceData)
+                .build();
+        //requests here
+        Request request = new Request.Builder()
+                .url("http://192.168.0.3:8000/api/illuminance")
+                .post(body)
+                .build();
+
+
+        //response here
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG, e.getMessage());
+                System.out.println("The failed message");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                } else {
+                    // do something wih the result
+                    Log.i(TAG, response.body().string());
+                }
+
+            }
+
+
+        });
+    }
+    //okHttp request/response to server ends...
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
@@ -150,6 +200,9 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
         alsltr329.illuminance().addRouteAsync(source -> {
             source.stream((data, env) -> {
                 final Float lux = data.value(Float.class);
+
+                //Calling POST request
+                postRequesttoServer(lux.toString());
 
                 LineData chartData = chart.getData();
 

@@ -116,12 +116,13 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
     }
 
+
+    //okHttp request/response to server begins...
     public void postRequesttoServer(String celsiusData){
         OkHttpClient okHttpClient = new OkHttpClient();
 
         //Creating JSON Object to send to server
        RequestBody body = new FormBody.Builder()
-               .add("time", "10")
                .add("celsius", celsiusData)
                .build();
        //requests here
@@ -153,6 +154,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
         });
     }
+    //okHttp request/response to server ends...
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {

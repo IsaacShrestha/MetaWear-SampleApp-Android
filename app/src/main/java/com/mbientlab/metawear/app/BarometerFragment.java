@@ -57,6 +57,7 @@ import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -81,63 +82,40 @@ public class BarometerFragment extends SensorFragment {
         super(R.string.navigation_fragment_barometer, R.layout.fragment_sensor, 80000, 110000);
         altitudeMin= -300;
         altitudeMax= 1500;
-        postRequesttoServer("Hello");
+
     }
 
-    //okHttp post code starts from here
-    public static final MediaType MEDIA_TYPE =
-            MediaType.parse("application/vnd.api+json");
 
-    public void postRequesttoServer(String str){
-
-        //okHttp requests here
+    //okHttp request/response to server begins...
+    public void postRequesttoServer(String pressureData, String altitudeData){
         OkHttpClient okHttpClient = new OkHttpClient();
-        JSONObject postdata = new JSONObject();
-       // JSONObject data = new JSONObject();
-        try {
-            //data.put("eventtype",str);
-            postdata.put("time", "Hello" );
-            postdata.put("celsius", "Hello" );
-        } catch(JSONException e){
-            // TODO Auto-generated catch block
-            System.out.println("1st exception");
-            e.printStackTrace();
-        }
 
-        RequestBody body = RequestBody.create(MEDIA_TYPE,
-                postdata.toString());
-
-        Log.i(TAG, String.valueOf(body));
-        //initialize requests here
+        //Creating JSON Object to send to server
+        RequestBody body = new FormBody.Builder()
+                .add("pressure", pressureData)
+                .add("altitude", altitudeData)
+                .build();
+        //requests here
         Request request = new Request.Builder()
-                .url("http://192.168.0.3:8000/api/temperature")
+                .url("http://192.168.0.3:8000/api/barometer")
                 .post(body)
                 .build();
 
-        //execute requests here
+
+        //response here
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //String mMessage = e.getMessage().toString();
                 Log.i(TAG, e.getMessage());
-                System.out.println("Second Error");
+                System.out.println("The failed message");
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String mMessage = response.body().string();
-                Log.i(TAG, "The response body =" + mMessage);
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject json = new JSONObject(mMessage);
-                        final String serverResponse = json.getString("Your Index");
-
-                    } catch (Exception e){
-                        System.out.println("Third exception: Failed JSON Object");
-                        Log.i(TAG, e.getMessage());
-                    }
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
                 } else {
-                    System.out.println("response failed");
+                    // do something wih the result
                     Log.i(TAG, response.body().string());
                 }
 
@@ -146,7 +124,10 @@ public class BarometerFragment extends SensorFragment {
 
         });
     }
-    //okHttp post code ends here
+    //okHttp request/response to server ends...
+
+
+
     @Override
     protected void boardReady() throws UnsupportedModuleException {
         barometer = mwBoard.getModuleOrThrow(BarometerBosch.class);
@@ -159,42 +140,71 @@ public class BarometerFragment extends SensorFragment {
 
     @Override
     protected void setup() {
+
+
         barometer.configure()
                 .pressureOversampling(OversamplingMode.ULTRA_HIGH)
                 .filterCoeff(FilterCoeff.OFF)
                 .standbyTime(0.5f)
                 .commit();
 
+
+
         barometer.pressure().addRouteAsync(source -> source.stream((data, env) -> {
+            //line added to read pressure and store it in pressureData variable
+            final Float pressure = data.value(Float.class);
+
+            //calling function printData
+            printData();
+
             LineData chartData = chart.getData();
             if (pressureData.size() >= sampleCount) {
                 chartData.addXValue(String.format(Locale.US, "%.2f", sampleCount * LIGHT_SAMPLE_PERIOD));
                 sampleCount++;
-
                 updateChart();
             }
             chartData.addEntry(new Entry(data.value(Float.class), sampleCount), 0);
+
         })).continueWithTask(task -> {
             streamRoute = task.getResult();
 
             return barometer.altitude().addRouteAsync(source -> source.stream((data, env) -> {
+                //line added to read altitude and store it in altitudeData variable
+                final Float altitude = data.value(Float.class);
+
                 LineData chartData = chart.getData();
+
                 if (altitudeData.size() >= sampleCount) {
                     chartData.addXValue(String.format(Locale.US, "%.2f", sampleCount * LIGHT_SAMPLE_PERIOD));
                     sampleCount++;
-
                     updateChart();
                 }
                 chartData.addEntry(new Entry(data.value(Float.class), sampleCount), 1);
+
             }));
         }).continueWith(task -> {
             altitudeRoute = task.getResult();
-
             barometer.altitude().start();
             barometer.pressure().start();
             barometer.start();
             return null;
         });
+
+
+    }
+
+    //function to break array of data from setup() into pressure and altitude
+    public void printData() {
+        LineData data = chart.getLineData();
+        LineDataSet pressureDataSet = data.getDataSetByIndex(0), altitudeDataSet = data.getDataSetByIndex(1);
+        for (int i = 0; i < data.getXValCount(); i++) {
+
+            final Float pressure = pressureDataSet.getEntryForXIndex(i).getVal();
+            final Float altitude = altitudeDataSet.getEntryForXIndex(i).getVal();
+
+            //calling function postRequesttoServer with String pressure and altitude values
+            postRequesttoServer(pressure.toString(), altitude.toString());
+        }
     }
 
     @Override
@@ -222,6 +232,7 @@ public class BarometerFragment extends SensorFragment {
             altitudeRoute = null;
         }
     }
+
 
     @Override
     protected String saveData() {
