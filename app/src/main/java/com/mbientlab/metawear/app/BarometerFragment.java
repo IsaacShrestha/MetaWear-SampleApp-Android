@@ -33,7 +33,6 @@ package com.mbientlab.metawear.app;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -46,25 +45,13 @@ import com.mbientlab.metawear.app.help.HelpOptionAdapter;
 import com.mbientlab.metawear.module.BarometerBosch;
 import com.mbientlab.metawear.module.BarometerBosch.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by etsai on 8/22/2015.

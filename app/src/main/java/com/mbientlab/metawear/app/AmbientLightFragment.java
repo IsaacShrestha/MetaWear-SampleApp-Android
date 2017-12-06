@@ -48,17 +48,10 @@ import com.mbientlab.metawear.app.help.HelpOptionAdapter;
 import com.mbientlab.metawear.module.AmbientLightLtr329;
 import com.mbientlab.metawear.module.AmbientLightLtr329.*;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.Buffer;
 import java.util.Locale;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -86,44 +79,6 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
 
     }
 
-    //okHttp request/response to server begins...
-    public void postRequesttoServer(String illuminanceData){
-        OkHttpClient okHttpClient = new OkHttpClient();
-
-        //Creating JSON Object to send to server
-        RequestBody body = new FormBody.Builder()
-                .add("illuminance", illuminanceData)
-                .build();
-        //requests here
-        Request request = new Request.Builder()
-                .url("http://10.12.12.21:8000/api/illuminance")
-                .post(body)
-                .build();
-
-
-        //response here
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG, e.getMessage());
-                System.out.println("The failed message");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected code " + response);
-                } else {
-                    // do something wih the result
-                    Log.i(TAG, response.body().string());
-                }
-
-            }
-
-
-        });
-    }
-    //okHttp request/response to server ends...
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {

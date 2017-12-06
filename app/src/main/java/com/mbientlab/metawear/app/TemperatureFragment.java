@@ -58,37 +58,16 @@ import com.mbientlab.metawear.module.Temperature.SensorType;
 import com.mbientlab.metawear.module.Timer;
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 
-//import javax.security.auth.callback.Callback;
-
-import okhttp3.Authenticator;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Credentials;
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.Request;
-//import com.squareup.okhttp.OkHttpClient;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.Route;
 
 
-import static android.content.ContentValues.TAG;
 import static android.view.View.GONE;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.VISIBLE;
-import static junit.framework.Assert.assertTrue;
+
 
 /**
  * Created by etsai on 8/19/2015.
