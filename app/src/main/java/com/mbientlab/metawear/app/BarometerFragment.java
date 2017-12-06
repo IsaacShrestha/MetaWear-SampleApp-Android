@@ -100,7 +100,7 @@ public class BarometerFragment extends SensorFragment {
             final Float pressure = data.value(Float.class);
 
             //calling function printData
-            printData();
+            //printData();
 
             LineData chartData = chart.getData();
             if (pressureData.size() >= sampleCount) {
@@ -139,7 +139,7 @@ public class BarometerFragment extends SensorFragment {
     }
 
     //function to break array of data from setup() into pressure and altitude
-    public void printData() {
+    /*public void printData() {
         LineData data = chart.getLineData();
         LineDataSet pressureDataSet = data.getDataSetByIndex(0), altitudeDataSet = data.getDataSetByIndex(1);
         for (int i = 0; i < data.getXValCount(); i++) {
@@ -147,12 +147,12 @@ public class BarometerFragment extends SensorFragment {
             final Float pressureData = pressureDataSet.getEntryForXIndex(i).getVal();
             final Float altitudeData = altitudeDataSet.getEntryForXIndex(i).getVal();
 
-            //calling AppHook
             String strUrl = "http://192.168.0.4:8000/api/barometer";
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postTwoData(strUrl,"pressure", "altitude", pressureData.toString(), altitudeData.toString());
+
         }
-    }
+    }*/
 
     @Override
     protected void initializeChart() {
@@ -193,9 +193,19 @@ public class BarometerFragment extends SensorFragment {
             LineData data = chart.getLineData();
             LineDataSet pressureDataSet = data.getDataSetByIndex(0), altitudeDataSet = data.getDataSetByIndex(1);
             for (int i = 0; i < data.getXValCount(); i++) {
+                final Float pressureData = pressureDataSet.getEntryForXIndex(i).getVal();
+                final Float altitudeData = altitudeDataSet.getEntryForXIndex(i).getVal();
+
+                //Calling AppHook
+                String strUrl = "http://192.168.0.4:8000/api/barometer";
+                AppHook posttoWebapp = new AppHook();
+                posttoWebapp.postTwoData(strUrl,"pressure", "altitude", pressureData.toString(), altitudeData.toString());
+
                 fos.write(String.format(Locale.US, "%.3f,%.3f,%.3f%n", i * LIGHT_SAMPLE_PERIOD,
                         pressureDataSet.getEntryForXIndex(i).getVal(),
                         altitudeDataSet.getEntryForXIndex(i).getVal()).getBytes());
+
+
             }
             fos.close();
             return filename;
