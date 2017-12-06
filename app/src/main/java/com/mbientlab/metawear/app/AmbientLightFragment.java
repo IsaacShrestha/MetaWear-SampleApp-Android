@@ -96,7 +96,7 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
                 .build();
         //requests here
         Request request = new Request.Builder()
-                .url("http://192.168.0.3:8000/api/illuminance")
+                .url("http://10.12.12.21:8000/api/illuminance")
                 .post(body)
                 .build();
 
@@ -201,8 +201,10 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
             source.stream((data, env) -> {
                 final Float lux = data.value(Float.class);
 
-                //Calling POST request
-                postRequesttoServer(lux.toString());
+                //Calling AppHook with name and value
+                String strUrl = "http://192.168.0.4:8000/api/illuminance";
+                AppHook posttoWebapp = new AppHook();
+                posttoWebapp.postSingleData(strUrl,"illuminance", lux.toString());
 
                 LineData chartData = chart.getData();
 

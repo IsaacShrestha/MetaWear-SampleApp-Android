@@ -86,48 +86,6 @@ public class BarometerFragment extends SensorFragment {
     }
 
 
-    //okHttp request/response to server begins...
-    public void postRequesttoServer(String pressureData, String altitudeData){
-        OkHttpClient okHttpClient = new OkHttpClient();
-
-        //Creating JSON Object to send to server
-        RequestBody body = new FormBody.Builder()
-                .add("pressure", pressureData)
-                .add("altitude", altitudeData)
-                .build();
-        //requests here
-        Request request = new Request.Builder()
-                .url("http://192.168.0.3:8000/api/barometer")
-                .post(body)
-                .build();
-
-
-        //response here
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG, e.getMessage());
-                System.out.println("The failed message");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected code " + response);
-                } else {
-                    // do something wih the result
-                    Log.i(TAG, response.body().string());
-                }
-
-            }
-
-
-        });
-    }
-    //okHttp request/response to server ends...
-
-
-
     @Override
     protected void boardReady() throws UnsupportedModuleException {
         barometer = mwBoard.getModuleOrThrow(BarometerBosch.class);
@@ -199,11 +157,13 @@ public class BarometerFragment extends SensorFragment {
         LineDataSet pressureDataSet = data.getDataSetByIndex(0), altitudeDataSet = data.getDataSetByIndex(1);
         for (int i = 0; i < data.getXValCount(); i++) {
 
-            final Float pressure = pressureDataSet.getEntryForXIndex(i).getVal();
-            final Float altitude = altitudeDataSet.getEntryForXIndex(i).getVal();
+            final Float pressureData = pressureDataSet.getEntryForXIndex(i).getVal();
+            final Float altitudeData = altitudeDataSet.getEntryForXIndex(i).getVal();
 
-            //calling function postRequesttoServer with String pressure and altitude values
-            postRequesttoServer(pressure.toString(), altitude.toString());
+            //calling AppHook
+            String strUrl = "http://192.168.0.4:8000/api/barometer";
+            AppHook posttoWebapp = new AppHook();
+            posttoWebapp.postTwoData(strUrl,"pressure", "altitude", pressureData.toString(), altitudeData.toString());
         }
     }
 

@@ -108,64 +108,22 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
     private Spinner sourceSelector;
 
-    public static final MediaType JSON =
-            MediaType.parse("multipart/form-data");
-
 
     public TemperatureFragment() {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
+
     }
 
 
-    //okHttp request/response to server begins...
-    public void postRequesttoServer(String celsiusData){
-        OkHttpClient okHttpClient = new OkHttpClient();
 
-        //Creating JSON Object to send to server
-       RequestBody body = new FormBody.Builder()
-               .add("celsius", celsiusData)
-               .build();
-       //requests here
-        Request request = new Request.Builder()
-                .url("http://192.168.0.3:8000/api/temperature")
-                .post(body)
-                .build();
-
-
-        //response here
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG, e.getMessage());
-                System.out.println("The failed message");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected code " + response);
-                } else {
-                    // do something wih the result
-                    Log.i(TAG, response.body().string());
-                }
-
-            }
-
-
-        });
-    }
-    //okHttp request/response to server ends...
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
 
-
-
-
-
         sourceSelector= (Spinner) view.findViewById(R.id.temperature_source);
+        System.out.println("SourceSelector = "+sourceSelector);
         sourceSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View innerView, int position, long id) {
@@ -210,10 +168,12 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             sourceSelector.setAdapter(spinnerAdapter);
             sourceSelector.setSelection(selectedSourceIndex);
+            System.out.println("SpinnerEntries ="+spinnerAdapter);
         }
 
         final EditText extThermPinText= (EditText) view.findViewById(R.id.ext_thermistor_data_pin);
         extThermPinText.setText(String.format(Locale.US, "%d", gpioDataPin));
+        System.out.println("ThermPin 1 ="+extThermPinText);
         extThermPinText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -285,6 +245,9 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     protected void boardReady() throws UnsupportedModuleException {
         timerModule= mwBoard.getModuleOrThrow(Timer.class);
         tempModule= mwBoard.getModuleOrThrow(Temperature.class);
+        String totalData = timerModule + "\n" + tempModule;
+        System.out.println("timerModule from boardReady() ="+timerModule);
+        System.out.println("tempModule from boardReady() ="+tempModule);
 
         spinnerEntries = new ArrayList<>();
         for (Temperature.Sensor it: tempModule.sensors()) {
@@ -309,16 +272,22 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     @Override
     protected void setup() {
         Temperature.Sensor tempSensor = tempModule.sensors()[selectedSourceIndex];
+        System.out.println("setup tempSensor ="+tempSensor);
+
         if (tempSensor.type() == SensorType.EXT_THERMISTOR) {
             ((Temperature.ExternalThermistor) tempModule.sensors()[selectedSourceIndex]).configure(gpioDataPin, gpioPulldownPin, activeHigh);
         }
         tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
             final Float celsius = data.value(Float.class);
             //System.out.println("output #celsius = "+ celsius);
-            //Calling postRequestService
-            postRequesttoServer(celsius.toString());
+
+           //Calling AppHook to post  name and value
+            String strUrl = "http://192.168.0.4:8000/api/temperature";
+            AppHook posttoWebapp = new AppHook();
+            posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
             LineData chartData = chart.getData();
+            System.out.println("setup chartData ="+ chartData);
 
             if (startTime == -1) {
                 chartData.addXValue("0");
@@ -340,8 +309,11 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             scheduledTask = task.getResult();
             scheduledTask.start();
 
+            System.out.println("setup scheduledTask ="+ scheduledTask);
             return null;
         });
+
+
     }
 
     @Override
@@ -357,4 +329,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             startTime= -1;
         }
     }
+
+
 }
