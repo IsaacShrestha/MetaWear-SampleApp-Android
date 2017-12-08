@@ -201,6 +201,14 @@ public class BarometerFragment extends SensorFragment {
                 AppHook posttoWebapp = new AppHook();
                 posttoWebapp.postTwoData(strUrl,"pressure", "altitude", pressureData.toString(), altitudeData.toString());
 
+
+                //Calling AppHook to post in SecuWear
+                String reqUrl = "http://192.168.0.3:4000/api/events";
+                Long systemTime = System.currentTimeMillis();
+
+                AppHook secuwear = new AppHook();
+                secuwear.posttoSecuWear(reqUrl, systemTime,"Barometer handler executed", "app/src/main/java/com/mbientlab/metawear/app/BarometerFragment.java","line 202");
+
                 fos.write(String.format(Locale.US, "%.3f,%.3f,%.3f%n", i * LIGHT_SAMPLE_PERIOD,
                         pressureDataSet.getEntryForXIndex(i).getVal(),
                         altitudeDataSet.getEntryForXIndex(i).getVal()).getBytes());

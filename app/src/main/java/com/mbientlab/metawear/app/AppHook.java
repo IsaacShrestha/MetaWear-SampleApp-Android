@@ -16,9 +16,37 @@ import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
+import java.time.LocalDateTime;
+
 
 public class AppHook {
     OkHttpClient okHttpClient = new OkHttpClient();
+
+    //post request to SecuWear
+    public void posttoSecuWear(String url,Long systemTime, String event, String codeFile, String codeLine){
+        //URL to post
+        String strUrl = url;
+
+        //Creating data for server
+        RequestBody body = new FormBody.Builder()
+                .add("systemTime", systemTime.toString())
+                .add("eventtype", "Request from MetaWear to WebApp")
+                .add("event", event )
+                .add("codereference" , codeFile+" : "+codeLine)
+                .add("domain", "Mobile")
+                .add("run", "1")
+                .build();
+
+        //requests here
+        Request request = new Request.Builder()
+                .url(strUrl)
+                .post(body)
+                .build();
+
+        //calling response
+        responseFromServer(request);
+
+    }
 
     //post request for single data
     public void postSingleData(String url, String name, String data){

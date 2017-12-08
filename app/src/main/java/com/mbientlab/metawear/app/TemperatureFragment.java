@@ -260,14 +260,19 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             final Float celsius = data.value(Float.class);
             //System.out.println("output #celsius = "+ celsius);
 
-           //Calling AppHook to post  name and value
-            String strUrl = "http://192.168.0.4:8000/api/temperature";
+           //Calling AppHook to post  Temperature data to WebApp
+            String strUrl = "http://192.168.0.3:8000/api/temperature";
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
-            LineData chartData = chart.getData();
-            System.out.println("setup chartData ="+ chartData);
+            //Calling AppHook to post in SecuWear
+            String reqUrl = "http://192.168.0.3:4000/api/events";
+            Long systemTime = System.currentTimeMillis();
 
+            AppHook secuwear = new AppHook();
+            secuwear.posttoSecuWear(reqUrl, systemTime,"Temperature handler executed", "app/src/main/java/com/mbientlab/metawear/app/TemperatureFragment.java","line 266");
+
+            LineData chartData = chart.getData();
             if (startTime == -1) {
                 chartData.addXValue("0");
                 startTime = System.currentTimeMillis();

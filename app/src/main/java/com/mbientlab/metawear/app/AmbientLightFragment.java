@@ -161,6 +161,14 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
                 AppHook posttoWebapp = new AppHook();
                 posttoWebapp.postSingleData(strUrl,"illuminance", lux.toString());
 
+                //Calling AppHook to post in SecuWear
+                String reqUrl = "http://192.168.0.3:4000/api/events";
+                Long systemTime = System.currentTimeMillis();
+
+                AppHook secuwear = new AppHook();
+                secuwear.posttoSecuWear(reqUrl, systemTime,"Illuminace handler executed", "app/src/main/java/com/mbientlab/metawear/app/AmbientLightFragment.java","line 162");
+
+
                 LineData chartData = chart.getData();
 
                 if (startTime == -1) {
