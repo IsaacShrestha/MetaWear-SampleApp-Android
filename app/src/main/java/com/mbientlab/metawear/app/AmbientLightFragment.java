@@ -162,7 +162,7 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
                 posttoWebapp.postSingleData(strUrl,"illuminance", lux.toString());
 
                 //Calling AppHook to post in SecuWear
-                String reqUrl = "http://192.168.0.3:4000/api/events";
+                String reqUrl = "http://192.168.0.4:4000/api/events";
                 Long systemTime = System.currentTimeMillis();
 
                 AppHook secuwear = new AppHook();

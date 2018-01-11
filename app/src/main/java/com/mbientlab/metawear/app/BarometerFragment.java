@@ -196,6 +196,7 @@ public class BarometerFragment extends SensorFragment {
                 final Float pressureData = pressureDataSet.getEntryForXIndex(i).getVal();
                 final Float altitudeData = altitudeDataSet.getEntryForXIndex(i).getVal();
 
+                //Both of this works only when saving data
                 //Calling AppHook
                 String strUrl = "http://192.168.0.4:8000/api/barometer";
                 AppHook posttoWebapp = new AppHook();
@@ -203,7 +204,7 @@ public class BarometerFragment extends SensorFragment {
 
 
                 //Calling AppHook to post in SecuWear
-                String reqUrl = "http://192.168.0.3:4000/api/events";
+                String reqUrl = "http://192.168.0.4:4000/api/events";
                 Long systemTime = System.currentTimeMillis();
 
                 AppHook secuwear = new AppHook();

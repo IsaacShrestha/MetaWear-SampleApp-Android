@@ -16,11 +16,14 @@ import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.lang.Object;
 
 
 public class AppHook {
-    OkHttpClient okHttpClient = new OkHttpClient();
+
+    public static OkHttpClient client = new OkHttpClient();
 
     //post request to SecuWear
     public void posttoSecuWear(String url,Long systemTime, String event, String codeFile, String codeLine){
@@ -38,13 +41,15 @@ public class AppHook {
                 .build();
 
         //requests here
-        Request request = new Request.Builder()
-                .url(strUrl)
-                .post(body)
-                .build();
+            Request request = new Request.Builder()
+                    .url(strUrl)
+                    .post(body)
+                    .build();
 
         //calling response
-        responseFromServer(request);
+            responseFromServer(request);
+
+
 
     }
 
@@ -90,13 +95,13 @@ public class AppHook {
         responseFromServer(request);
     }
 
-    //okHttp request/response to secuwear-webapp
+    //Response from server
     public void responseFromServer(Request request){
         //response here
-        okHttpClient.newCall(request).enqueue(new Callback() {
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, e.getMessage());
+                Log.i(TAG, "#######"+e.getMessage());
             }
 
             @Override
@@ -107,13 +112,27 @@ public class AppHook {
 
                 } else {
                     // do something wih the result
-                    Log.i(TAG, response.body().string());
-                }
+                    try {
+                        Log.i(TAG, response.body().string());
 
+                    }catch (OutOfMemoryError e){
+                        Log.i(TAG, "####line 117");
+
+                    }
+
+
+
+
+                    //InputStream inputStream.close();
+                }
             }
 
 
+
         });
+
+
+
     }
     //okHttp request/response to server ends...
 

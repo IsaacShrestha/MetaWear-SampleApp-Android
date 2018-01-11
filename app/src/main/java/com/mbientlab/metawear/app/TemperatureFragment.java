@@ -32,6 +32,7 @@
 package com.mbientlab.metawear.app;
 
 import android.app.DownloadManager;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -63,7 +64,8 @@ import java.util.List;
 import java.util.Locale;
 
 
-
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -90,7 +92,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
     public TemperatureFragment() {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
-
     }
 
 
@@ -148,6 +149,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             sourceSelector.setAdapter(spinnerAdapter);
             sourceSelector.setSelection(selectedSourceIndex);
             System.out.println("SpinnerEntries ="+spinnerAdapter);
+            System.out.println("from line 151");
         }
 
         final EditText extThermPinText= (EditText) view.findViewById(R.id.ext_thermistor_data_pin);
@@ -211,6 +213,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 activeHigh = (position != 0);
+                System.out.println("from line 215");
             }
 
             @Override
@@ -260,22 +263,31 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             final Float celsius = data.value(Float.class);
             //System.out.println("output #celsius = "+ celsius);
 
+
            //Calling AppHook to post  Temperature data to WebApp
-            String strUrl = "http://192.168.0.3:8000/api/temperature";
+            String strUrl = "http://192.168.0.4:8000/api/temperature";
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
+
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://192.168.0.3:4000/api/events";
+            String reqUrl = "http://192.168.0.4:4000/api/events";
             Long systemTime = System.currentTimeMillis();
 
             AppHook secuwear = new AppHook();
             secuwear.posttoSecuWear(reqUrl, systemTime,"Temperature handler executed", "app/src/main/java/com/mbientlab/metawear/app/TemperatureFragment.java","line 266");
 
+
+            posttoWebapp = null;
+            secuwear = null;
+
+
             LineData chartData = chart.getData();
             if (startTime == -1) {
+
                 chartData.addXValue("0");
                 startTime = System.currentTimeMillis();
+
 
             } else {
                 chartData.addXValue(String.format(Locale.US, "%.2f", sampleCount * samplingPeriod));
@@ -287,16 +299,13 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             updateChart();
         })).continueWithTask(task -> {
             streamRoute = task.getResult();
-
             return timerModule.scheduleAsync(TEMP_SAMPLE_PERIOD, false, tempSensor::read);
         }).continueWithTask(task -> {
             scheduledTask = task.getResult();
             scheduledTask.start();
-
             System.out.println("setup scheduledTask ="+ scheduledTask);
             return null;
         });
-
 
     }
 

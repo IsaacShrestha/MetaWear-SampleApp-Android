@@ -11,7 +11,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/metawear_logo"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
+        <!--android:largeHeap="true"-->
+
+
 
         <service android:name=".DfuService" />
         <service android:name="com.mbientlab.metawear.android.BtleService" />
