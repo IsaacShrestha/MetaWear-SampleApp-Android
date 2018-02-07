@@ -65,6 +65,9 @@ public class BarometerFragment extends SensorFragment {
     private Route altitudeRoute = null;
     private final ArrayList<Entry> altitudeData= new ArrayList<>(), pressureData= new ArrayList<>();
 
+    //for shared data location
+    public static final String MY_PREFERENCE = "MyPref";
+
     public BarometerFragment() {
         super(R.string.navigation_fragment_barometer, R.layout.fragment_sensor, 80000, 110000);
         altitudeMin= -300;
@@ -198,17 +201,19 @@ public class BarometerFragment extends SensorFragment {
 
                 //Both of this works only when saving data
                 //Calling AppHook
-                String strUrl = "http://192.168.0.4:8000/api/barometer";
+                String strUrl = "http://192.168.0.5:8000/api/barometer";
                 AppHook posttoWebapp = new AppHook();
                 posttoWebapp.postTwoData(strUrl,"pressure", "altitude", pressureData.toString(), altitudeData.toString());
 
 
                 //Calling AppHook to post in SecuWear
-                String reqUrl = "http://192.168.0.4:4000/api/events";
+                String reqUrl = "http://192.168.0.5:4000/api/events";
                 Long systemTime = System.currentTimeMillis();
 
                 AppHook secuwear = new AppHook();
                 secuwear.posttoSecuWear(reqUrl, systemTime,"Barometer handler executed", "app/src/main/java/com/mbientlab/metawear/app/BarometerFragment.java","line 202");
+
+
 
                 fos.write(String.format(Locale.US, "%.3f,%.3f,%.3f%n", i * LIGHT_SAMPLE_PERIOD,
                         pressureDataSet.getEntryForXIndex(i).getVal(),

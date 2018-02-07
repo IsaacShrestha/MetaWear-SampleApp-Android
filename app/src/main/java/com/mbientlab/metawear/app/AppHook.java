@@ -23,6 +23,7 @@ import java.lang.Object;
 
 public class AppHook {
 
+
     public static OkHttpClient client = new OkHttpClient();
 
     //post request to SecuWear

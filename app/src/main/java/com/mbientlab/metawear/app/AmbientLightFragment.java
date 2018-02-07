@@ -157,12 +157,12 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
                 final Float lux = data.value(Float.class);
 
                 //Calling AppHook with name and value
-                String strUrl = "http://192.168.0.4:8000/api/illuminance";
+                String strUrl = "http://192.168.0.5:8000/api/illuminance";
                 AppHook posttoWebapp = new AppHook();
                 posttoWebapp.postSingleData(strUrl,"illuminance", lux.toString());
 
                 //Calling AppHook to post in SecuWear
-                String reqUrl = "http://192.168.0.4:4000/api/events";
+                String reqUrl = "http://192.168.0.5:4000/api/events";
                 Long systemTime = System.currentTimeMillis();
 
                 AppHook secuwear = new AppHook();

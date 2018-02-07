@@ -32,6 +32,8 @@
 package com.mbientlab.metawear.app;
 
 import android.app.DownloadManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -42,6 +44,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -70,6 +74,7 @@ import okhttp3.Request;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import com.example.adslibrary.*;
 
 /**
  * Created by etsai on 8/19/2015.
@@ -95,13 +100,26 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     }
 
 
-
-
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        //code here is for testing webview
+        /*webView = (WebView) view.findViewById(R.id.my_web_view);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl("http://ishrestha.com/metawear-ads/ads.php");*/
 
+        WebView myWebView = (WebView) view.findViewById(R.id.my_web_view);
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        myWebView.loadUrl("http://ishrestha.com/metawear-ads/ads.php");
+        myWebView.addJavascriptInterface(new WebAppInterface(this.getContext()), "Android" );
+
+        //String summary = "<html><body>This is shit</body></html>";
+        //webView.loadData(summary, "text/html", null);
+
+        //code below here is not mine
         sourceSelector= (Spinner) view.findViewById(R.id.temperature_source);
         System.out.println("SourceSelector = "+sourceSelector);
         sourceSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -252,9 +270,11 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         Temperature.Sensor tempSensor = tempModule.sensors()[selectedSourceIndex];
         System.out.println("setup tempSensor ="+tempSensor);
+
+
 
         if (tempSensor.type() == SensorType.EXT_THERMISTOR) {
             ((Temperature.ExternalThermistor) tempModule.sensors()[selectedSourceIndex]).configure(gpioDataPin, gpioPulldownPin, activeHigh);
@@ -265,14 +285,15 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
 
            //Calling AppHook to post  Temperature data to WebApp
-            String strUrl = "http://192.168.0.4:8000/api/temperature";
+            String strUrl = "http://192.168.0.5:8000/api/temperature";
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
 
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://192.168.0.4:4000/api/events";
+            String reqUrl = "http://192.168.0.5:4000/api/events";
             Long systemTime = System.currentTimeMillis();
+            System.out.println(systemTime);
 
             AppHook secuwear = new AppHook();
             secuwear.posttoSecuWear(reqUrl, systemTime,"Temperature handler executed", "app/src/main/java/com/mbientlab/metawear/app/TemperatureFragment.java","line 266");
@@ -280,6 +301,16 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
             posttoWebapp = null;
             secuwear = null;
+
+
+
+            //using shared memory to store data
+            //SharedPreferences pref = getContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            //System.out.println(pref);
+            //SharedPreferences.Editor edit = pref.edit();
+            //edit.putLong("Time", systemTime );
+            //edit.putFloat("Temperature", celsius );
+            //edit.commit();
 
 
             LineData chartData = chart.getData();
@@ -297,6 +328,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             sampleCount++;
 
             updateChart();
+
         })).continueWithTask(task -> {
             streamRoute = task.getResult();
             return timerModule.scheduleAsync(TEMP_SAMPLE_PERIOD, false, tempSensor::read);
@@ -307,7 +339,10 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             return null;
         });
 
+
+
     }
+
 
     @Override
     protected void clean() {

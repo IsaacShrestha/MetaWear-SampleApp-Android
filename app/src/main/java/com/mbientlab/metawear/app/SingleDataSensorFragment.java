@@ -32,6 +32,7 @@
 package com.mbientlab.metawear.app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import com.github.mikephil.charting.data.Entry;
@@ -72,8 +73,16 @@ public abstract class SingleDataSensorFragment extends SensorFragment {
         }
 
         try {
+            //creating and saving file in internal memory
             FileOutputStream fos = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
             fos.write(CSV_HEADER.getBytes());
+
+            //using shared memory to store data
+            SharedPreferences pref = getContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit = pref.edit();
+            //edit.putLong("Time", systemTime );
+            //edit.putFloat("Temperature", 2);
+            //edit.commit();
 
             LineData data = chart.getLineData();
             List<String> chartXValues= data.getXVals();
@@ -81,10 +90,14 @@ public abstract class SingleDataSensorFragment extends SensorFragment {
             if (samplingPeriod < 0) {
                 for (int i = 0; i < chartXValues.size(); i++) {
                     fos.write(String.format(Locale.US, "%s,%.3f%n", chartXValues.get(i), tempDataSet.getEntryForXIndex(i).getVal()).getBytes());
+                    edit.putFloat("Temperature", 2);
+                    edit.apply();
                 }
             } else {
                 for (int i = 0; i < data.getXValCount(); i++) {
                     fos.write(String.format(Locale.US, "%.3f,%.3f%n", i * samplingPeriod, tempDataSet.getEntryForXIndex(i).getVal()).getBytes());
+                    edit.putFloat("Temperature", 1);
+                    edit.apply();
                 }
             }
             fos.close();
