@@ -46,14 +46,17 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 
+import com.mbientlab.metawear.CodeBlock;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.app.help.HelpOption;
 import com.mbientlab.metawear.app.help.HelpOptionAdapter;
@@ -66,8 +69,10 @@ import com.mbientlab.metawear.module.Timer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer.*;
 
 
+import bolts.Task;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -113,10 +118,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.loadUrl("http://ishrestha.com/metawear-ads/ads.php");
+        myWebView.loadUrl("http://www.ishrestha.com/metawear-ads/ads.php");
         myWebView.addJavascriptInterface(new WebAppInterface(this.getContext()), "Android" );
 
-        //String summary = "<html><body>This is shit</body></html>";
+
+        //AdsDisplay myAds = new AdsDisplay();
+        //myAds.DisplayAds(view);
+
+        //String summary = "<html><body>This is nice</body></html>";
         //webView.loadData(summary, "text/html", null);
 
         //code below here is not mine
@@ -285,13 +294,13 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
 
            //Calling AppHook to post  Temperature data to WebApp
-            String strUrl = "http://192.168.0.5:8000/api/temperature";
+            String strUrl = "http://192.168.0.4:8000/api/temperature";
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
 
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://192.168.0.5:4000/api/events";
+            String reqUrl = "http://192.168.0.4:4000/api/events";
             Long systemTime = System.currentTimeMillis();
             System.out.println(systemTime);
 
@@ -302,6 +311,10 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             posttoWebapp = null;
             secuwear = null;
 
+
+
+            WebAppInterface getTemp = new WebAppInterface(this.getContext());
+            getTemp.requestToServer(celsius.toString());
 
 
             //using shared memory to store data

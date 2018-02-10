@@ -1,15 +1,20 @@
-package com.mbientlab.metawear.app;
+package com.example.adslibrary;
 
 import android.content.Context;
+import android.location.Location;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.health.SystemHealthManager;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.example.adslibrary.BuildConfig;
+
 import java.io.IOException;
+import java.util.*;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -21,24 +26,26 @@ import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
+
+
 /**
- * Created by isaacshrestha on 2/6/18.
+ * Created by isaacshrestha on 2/8/18.
  */
-/*
+
+
 
 public class WebAppInterface {
-
    Context mContext;
 
     //posting data to ads server
-    public static OkHttpClient client = new OkHttpClient();
+    OkHttpClient client = new OkHttpClient();
     public Long systemTime = System.currentTimeMillis();
     public String stringSystemTime = Long.toString(systemTime);
-    public Float temp;
 
 
-
-    WebAppInterface(Context c) {
+    public String data;
+    public String tempVal;
+    public WebAppInterface(Context c) {
         mContext = c;
     }
 
@@ -52,14 +59,15 @@ public class WebAppInterface {
 
     }
 
-    @JavascriptInterface
-    public void getTempData(Float Temp) {
-        temp = Temp;
+    //Getting temp data... currently this function does nothing
+    public void receiveTemp(String temp){
+        data = temp;
+        Log.i(TAG, "Received temperature = "+data);
     }
 
     //Request to server
     @JavascriptInterface
-    public void requestToServer() {
+    public void requestToServer(String temp) {
 
         //Toast.makeText(mContext, Temp, Toast.LENGTH_SHORT).show();
 
@@ -76,25 +84,30 @@ public class WebAppInterface {
         String fullDeviceAddress = reqString +" "+ address;
 
         //Get package name
-          String packageName = BuildConfig.APPLICATION_ID;
-
+        String packageName = BuildConfig.APPLICATION_ID;
 
 
         //getting cookie
-            String cookies = CookieManager.getInstance().getCookie("http://192.168.0.5:4000/api/temperature");
+        //String cookies = CookieManager.getInstance().getCookie("http://192.168.0.4:8000/api/temperature");
+        //String cookies = CookieManager.getInstance().getCookie("http://www.google.com");
 
-        //getting temperature
-        TemperatureFragment tempobj = new TemperatureFragment();
-        tempobj.setup();
 
-        Log.i(TAG, "COOKIES = "+packageName);
+        //Log.i(TAG, "COOKIES = "+packageName);
         //Creating data for server
+        List<String> data = new ArrayList<>();
+        data.add(temp);
+        if(data.isEmpty()) {
+            tempVal = "0";
+        } else {
+            tempVal = data.get(data.size()-1);
+        }
+
         RequestBody body = new FormBody.Builder()
                 .add("device", fullDeviceAddress)
                 .add("time", stringSystemTime)
                 .add("package", packageName)
-                .add("temperature", "temperature")
-                .add("cookies", cookies)
+                .add("temperature", tempVal)
+                .add("cookies", "cookies")
                 .build();
 
         //requests here
@@ -142,4 +155,4 @@ public class WebAppInterface {
 
 }
 
-*/
+
