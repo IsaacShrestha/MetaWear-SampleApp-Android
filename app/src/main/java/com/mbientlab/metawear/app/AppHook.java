@@ -3,7 +3,7 @@ package com.mbientlab.metawear.app;
 import android.util.Log;
 
 
-import com.example.adslibrary.WebAppInterface;
+//import com.example.adslibrary.WebAppInterface;
 
 import java.io.IOException;
 
@@ -124,19 +124,10 @@ public class AppHook {
                         Log.i(TAG, "####line 117");
 
                     }
-
-
-
-
                     //InputStream inputStream.close();
                 }
             }
-
-
-
         });
-
-
 
     }
     //okHttp request/response to server ends...

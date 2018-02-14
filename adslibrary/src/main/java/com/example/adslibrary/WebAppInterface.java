@@ -38,120 +38,34 @@ public class WebAppInterface {
    Context mContext;
 
     //posting data to ads server
-    OkHttpClient client = new OkHttpClient();
+    /*OkHttpClient client = new OkHttpClient();
     public Long systemTime = System.currentTimeMillis();
     public String stringSystemTime = Long.toString(systemTime);
 
 
     public String data;
-    public String tempVal;
+    public String tempVal;*/
+
+    public static String dataFromServer;
     public WebAppInterface(Context c) {
         mContext = c;
     }
 
 
     @JavascriptInterface
-    public void showToast(String toast) { //I am not calling this function
+    public void showToast(String toast) {
         Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        dataFromServer = toast;
+
 
         //calling request to server
         //requestToServer();
 
     }
 
-    //Getting temp data... currently this function does nothing
-    public void receiveTemp(String temp){
-        data = temp;
-        Log.i(TAG, "Received temperature = "+data);
+    public static String someData() {
+        return dataFromServer;
     }
-
-    //Request to server
-    @JavascriptInterface
-    public void requestToServer(String temp) {
-
-        //Toast.makeText(mContext, Temp, Toast.LENGTH_SHORT).show();
-
-        //Finding device MAC
-        WifiManager manager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo info = manager.getConnectionInfo();
-        String address = info.getMacAddress();
-
-        //Finding device model name
-        String model = Build.MODEL;
-        String reqString = Build.MANUFACTURER+" " + Build.MODEL + " " + Build.VERSION.RELEASE + " " + Build.SERIAL;
-
-        //Full device info with MAC address
-        String fullDeviceAddress = reqString +" "+ address;
-
-        //Get package name
-        String packageName = BuildConfig.APPLICATION_ID;
-
-
-        //getting cookie
-        //String cookies = CookieManager.getInstance().getCookie("http://192.168.0.4:8000/api/temperature");
-        //String cookies = CookieManager.getInstance().getCookie("http://www.google.com");
-
-
-        //Log.i(TAG, "COOKIES = "+packageName);
-        //Creating data for server
-        List<String> data = new ArrayList<>();
-        data.add(temp);
-        if(data.isEmpty()) {
-            tempVal = "0";
-        } else {
-            tempVal = data.get(data.size()-1);
-        }
-
-        RequestBody body = new FormBody.Builder()
-                .add("device", fullDeviceAddress)
-                .add("time", stringSystemTime)
-                .add("package", packageName)
-                .add("temperature", tempVal)
-                .add("cookies", "cookies")
-                .build();
-
-        //requests here
-        Request request = new Request.Builder()
-                .url("http://ishrestha.com/metawear-ads/ads.php")
-                .post(body)
-                .build();
-
-        //calling response
-        responseFromServer(request);
-
-    }
-
-
-    //Response from server
-    public void responseFromServer(Request request) {
-        //response here
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "#######" + e.getMessage());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-
-                    throw new IOException("Unexpected code " + response);
-
-                } else {
-                    // do something wih the result
-                    try {
-                        Log.i(TAG, response.body().string());
-
-                    } catch (OutOfMemoryError e) {
-                        Log.i(TAG, "####line 117");
-
-                    }
-                }
-            }
-        });
-
-    }//End of Response
-
 
 }
 

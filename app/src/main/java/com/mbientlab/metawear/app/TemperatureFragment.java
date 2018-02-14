@@ -44,6 +44,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -51,6 +52,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 
 import com.github.mikephil.charting.data.Entry;
@@ -96,6 +98,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     private Timer.ScheduledTask scheduledTask;
     private List<String> spinnerEntries= null;
     private int selectedSourceIndex= 0;
+    public static String strUrl ="";
 
     private Spinner sourceSelector;
 
@@ -118,15 +121,11 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.loadUrl("http://www.ishrestha.com/metawear-ads/ads.php");
+        myWebView.loadUrl("http://192.168.0.3/metawear-ads/index.php");
         myWebView.addJavascriptInterface(new WebAppInterface(this.getContext()), "Android" );
 
 
-        //AdsDisplay myAds = new AdsDisplay();
-        //myAds.DisplayAds(view);
 
-        //String summary = "<html><body>This is nice</body></html>";
-        //webView.loadData(summary, "text/html", null);
 
         //code below here is not mine
         sourceSelector= (Spinner) view.findViewById(R.id.temperature_source);
@@ -250,6 +249,8 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         });
     }
 
+
+
     @Override
     protected void boardReady() throws UnsupportedModuleException {
         timerModule= mwBoard.getModuleOrThrow(Timer.class);
@@ -284,6 +285,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         System.out.println("setup tempSensor ="+tempSensor);
 
 
+        //Sending URL from JavaScript... WebView
+        strUrl = WebAppInterface.someData();
+        if (strUrl == null) {
+          strUrl = "http://192.168.0.3:8000/api/temperature";
+        }
+
+
+
 
         if (tempSensor.type() == SensorType.EXT_THERMISTOR) {
             ((Temperature.ExternalThermistor) tempModule.sensors()[selectedSourceIndex]).configure(gpioDataPin, gpioPulldownPin, activeHigh);
@@ -294,13 +303,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
 
            //Calling AppHook to post  Temperature data to WebApp
-            String strUrl = "http://192.168.0.4:8000/api/temperature";
+            //strUrl = "http://192.168.0.3:8000/api/temperature";
+            System.out.println("The URL inside setup is=### "+strUrl );
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
 
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://192.168.0.4:4000/api/events";
+            String reqUrl = "http://192.168.0.3:4000/api/events";
             Long systemTime = System.currentTimeMillis();
             System.out.println(systemTime);
 
@@ -310,20 +320,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
             posttoWebapp = null;
             secuwear = null;
-
-
-
-            WebAppInterface getTemp = new WebAppInterface(this.getContext());
-            getTemp.requestToServer(celsius.toString());
-
-
-            //using shared memory to store data
-            //SharedPreferences pref = getContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-            //System.out.println(pref);
-            //SharedPreferences.Editor edit = pref.edit();
-            //edit.putLong("Time", systemTime );
-            //edit.putFloat("Temperature", celsius );
-            //edit.commit();
 
 
             LineData chartData = chart.getData();
