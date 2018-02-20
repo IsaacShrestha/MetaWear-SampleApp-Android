@@ -58,7 +58,7 @@ public class ProximityFragment extends SingleDataSensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         ForcedDataProducer proximityAdc = proximity.adc();
         proximity.configure()
                 .transmitterDriveCurrent(TransmitterDriveCurrent.CURRENT_12_5MA)

@@ -119,7 +119,7 @@ public class ColorDetectorFragment extends SensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         ForcedDataProducer colorAdc = colorDetector.adc();
 
         colorDetector.configure()

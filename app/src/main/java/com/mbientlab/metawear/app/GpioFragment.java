@@ -204,7 +204,7 @@ public class GpioFragment extends SingleDataSensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         switch(readMode) {
             case READ_ADC:
                 gpio.pin(gpioPin).analogAdc().addRouteAsync(source -> source.stream(gpioSubscriber));

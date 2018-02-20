@@ -108,7 +108,7 @@ public class SensorFusionFragment extends SensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         sensorFusion.configure()
                 .mode(Mode.NDOF)
                 .accRange(AccRange.AR_16G)

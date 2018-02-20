@@ -110,7 +110,7 @@ public class AccelerometerFragment extends ThreeAxisChartFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         Accelerometer.ConfigEditor<?> editor = accelerometer.configure();
 
         editor.odr(ACC_FREQ);

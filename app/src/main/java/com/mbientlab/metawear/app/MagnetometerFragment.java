@@ -60,7 +60,7 @@ public class MagnetometerFragment extends ThreeAxisChartFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         magnetometer.configure()
                 .outputDataRate(MagnetometerBmm150.OutputDataRate.ODR_25_HZ)
                 .commit();

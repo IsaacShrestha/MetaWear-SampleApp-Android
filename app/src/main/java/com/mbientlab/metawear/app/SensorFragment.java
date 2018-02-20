@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.Switch;
 
@@ -120,6 +121,8 @@ public abstract class SensorFragment extends ModuleFragmentBase {
         return v;
     }
 
+
+
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -185,7 +188,8 @@ public abstract class SensorFragment extends ModuleFragmentBase {
         chart.getAxisRight().setEnabled(false);
     }
 
-    protected abstract void setup();
+    @JavascriptInterface
+    public void setup(){}
     protected abstract void clean();
     protected abstract String saveData();
     protected abstract void resetData(boolean clearData);

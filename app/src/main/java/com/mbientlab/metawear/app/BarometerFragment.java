@@ -87,7 +87,7 @@ public class BarometerFragment extends SensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
 
 
         barometer.configure()

@@ -58,7 +58,7 @@ public class HumidityFragment extends SingleDataSensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         ForcedDataProducer humiditValue = humidity.value();
         humiditValue.addRouteAsync(source -> source.stream((data, env) -> {
             LineData chartData = chart.getData();

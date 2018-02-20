@@ -67,5 +67,4 @@ dependencies {
     //OkHttp
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.squareup.okhttp3:okhttp:3.9.1'
-    compile project(':adslibrary')
 }

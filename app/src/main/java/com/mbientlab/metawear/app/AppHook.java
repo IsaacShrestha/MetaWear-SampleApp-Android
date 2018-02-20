@@ -1,6 +1,7 @@
 package com.mbientlab.metawear.app;
 
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 
 
 //import com.example.adslibrary.WebAppInterface;
@@ -18,9 +19,6 @@ import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.lang.Object;
 
 
 public class AppHook {

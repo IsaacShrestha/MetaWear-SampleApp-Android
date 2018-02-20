@@ -147,7 +147,7 @@ public class AmbientLightFragment extends SingleDataSensorFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         alsltr329.configure().gain(Gain.values()[sensorGainIndex])
                 .measurementRate(MeasurementRate.LTR329_RATE_50MS)
                 .integrationTime(IntegrationTime.LTR329_TIME_50MS)

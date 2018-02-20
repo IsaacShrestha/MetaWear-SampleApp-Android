@@ -81,7 +81,6 @@ import okhttp3.Request;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import com.example.adslibrary.*;
 
 /**
  * Created by etsai on 8/19/2015.
@@ -98,13 +97,15 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     private Timer.ScheduledTask scheduledTask;
     private List<String> spinnerEntries= null;
     private int selectedSourceIndex= 0;
-    public static String strUrl ="";
+    private static String strUrl;
 
     private Spinner sourceSelector;
 
+    private WebView myWebView;
 
     public TemperatureFragment() {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
+        strUrl = "http://10.12.0.255:8000/api/temperature";
     }
 
 
@@ -112,19 +113,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //code here is for testing webview
-        /*webView = (WebView) view.findViewById(R.id.my_web_view);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl("http://ishrestha.com/metawear-ads/ads.php");*/
-
-        WebView myWebView = (WebView) view.findViewById(R.id.my_web_view);
+        //Just to display WebView
+        myWebView = (WebView) view.findViewById(R.id.my_web_view);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.loadUrl("http://192.168.0.3/metawear-ads/index.php");
-        myWebView.addJavascriptInterface(new WebAppInterface(this.getContext()), "Android" );
-
-
+        myWebView.loadUrl("http://10.12.0.255/metawear-ads/");
+        //myWebView.addJavascriptInterface(this, "Android" );
+        myWebView.addJavascriptInterface(this, "Android" );
 
 
         //code below here is not mine
@@ -279,17 +275,26 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         adapter.add(new HelpOption(R.string.config_name_temp_pulldown_pin, R.string.config_desc_temp_pulldown_pin));
     }
 
-    @Override
+
+    @JavascriptInterface
+    public void setUrl(String value) {
+        strUrl = value;
+    }
+
+
+
+    @JavascriptInterface
+    public String getUrl() {
+        return strUrl;
+    }
+
+
+    //@Override
+    @JavascriptInterface
     public void setup() {
         Temperature.Sensor tempSensor = tempModule.sensors()[selectedSourceIndex];
         System.out.println("setup tempSensor ="+tempSensor);
-
-
-        //Sending URL from JavaScript... WebView
-        strUrl = WebAppInterface.someData();
-        if (strUrl == null) {
-          strUrl = "http://192.168.0.3:8000/api/temperature";
-        }
+        System.out.println("Msg from server#### ="+ strUrl);
 
 
 
@@ -303,14 +308,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
 
            //Calling AppHook to post  Temperature data to WebApp
-            //strUrl = "http://192.168.0.3:8000/api/temperature";
+            //strUrl = "http://10.12.0.255:8000/api/temperature";
             System.out.println("The URL inside setup is=### "+strUrl );
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
 
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://192.168.0.3:4000/api/events";
+            String reqUrl = "http://10.12.0.255:4000/api/events";
             Long systemTime = System.currentTimeMillis();
             System.out.println(systemTime);
 

@@ -104,7 +104,7 @@ public class GyroFragment extends ThreeAxisChartFragment {
     }
 
     @Override
-    protected void setup() {
+    public void setup() {
         Range[] values = Range.values();
         gyro.configure()
                 .odr(OutputDataRate.ODR_25_HZ)
