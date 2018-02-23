@@ -275,7 +275,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         adapter.add(new HelpOption(R.string.config_name_temp_active, R.string.config_desc_temp_active));
         adapter.add(new HelpOption(R.string.config_name_temp_data_pin, R.string.config_desc_temp_data_pin));
         adapter.add(new HelpOption(R.string.config_name_temp_pulldown_pin, R.string.config_desc_temp_pulldown_pin));
-        System.out.println("@@@ Triggered fillHelpOptionAdapter");
     }
 
 
