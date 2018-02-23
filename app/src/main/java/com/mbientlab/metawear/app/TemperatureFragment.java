@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer.*;
+import java.util.stream.Collectors;
 
 
 import bolts.Task;
@@ -98,6 +99,10 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     private List<String> spinnerEntries= null;
     private int selectedSourceIndex= 0;
     private static String strUrl;
+    private Float celsius=0.2f;
+    private List<Float> tempList = new ArrayList<>();
+    private int counter = 0;
+
 
     private Spinner sourceSelector;
 
@@ -105,7 +110,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
     public TemperatureFragment() {
         super(R.string.navigation_fragment_temperature, "celsius", R.layout.fragment_temperature, TEMP_SAMPLE_PERIOD / 1000.f, 15, 45);
-        strUrl = "http://10.12.0.255:8000/api/temperature";
+        strUrl = "http://192.168.0.8:8000/api/temperature";
     }
 
 
@@ -118,14 +123,14 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.loadUrl("http://10.12.0.255/metawear-ads/");
+        myWebView.loadUrl("http://192.168.0.8/metawear-ads/");
         //myWebView.addJavascriptInterface(this, "Android" );
         myWebView.addJavascriptInterface(this, "Android" );
 
 
         //code below here is not mine
         sourceSelector= (Spinner) view.findViewById(R.id.temperature_source);
-        System.out.println("SourceSelector = "+sourceSelector);
+        System.out.println("SourceSelector = % % % % % "+sourceSelector);
         sourceSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View innerView, int position, long id) {
@@ -134,7 +139,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
                         mwBoard.getModuleOrThrow(BarometerBosch.class).start();
                     } catch (UnsupportedModuleException e) {
                         view.findViewById(R.id.sample_control).setEnabled(false);
-
                         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setTitle(R.string.title_error);
                         builder.setMessage(R.string.message_no_bosch_barometer);
@@ -170,8 +174,6 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             sourceSelector.setAdapter(spinnerAdapter);
             sourceSelector.setSelection(selectedSourceIndex);
-            System.out.println("SpinnerEntries ="+spinnerAdapter);
-            System.out.println("from line 151");
         }
 
         final EditText extThermPinText= (EditText) view.findViewById(R.id.ext_thermistor_data_pin);
@@ -273,6 +275,7 @@ public class TemperatureFragment extends SingleDataSensorFragment {
         adapter.add(new HelpOption(R.string.config_name_temp_active, R.string.config_desc_temp_active));
         adapter.add(new HelpOption(R.string.config_name_temp_data_pin, R.string.config_desc_temp_data_pin));
         adapter.add(new HelpOption(R.string.config_name_temp_pulldown_pin, R.string.config_desc_temp_pulldown_pin));
+        System.out.println("@@@ Triggered fillHelpOptionAdapter");
     }
 
 
@@ -293,8 +296,8 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     @JavascriptInterface
     public void setup() {
         Temperature.Sensor tempSensor = tempModule.sensors()[selectedSourceIndex];
-        System.out.println("setup tempSensor ="+tempSensor);
-        System.out.println("Msg from server#### ="+ strUrl);
+        //System.out.println("setup tempSensor ="+tempSensor);
+        //System.out.println("Msg from server#### ="+ strUrl);
 
 
 
@@ -303,19 +306,21 @@ public class TemperatureFragment extends SingleDataSensorFragment {
             ((Temperature.ExternalThermistor) tempModule.sensors()[selectedSourceIndex]).configure(gpioDataPin, gpioPulldownPin, activeHigh);
         }
         tempSensor.addRouteAsync(source -> source.stream((data, env) -> {
-            final Float celsius = data.value(Float.class);
+            celsius = data.value(Float.class);
             //System.out.println("output #celsius = "+ celsius);
 
 
-           //Calling AppHook to post  Temperature data to WebApp
-            //strUrl = "http://10.12.0.255:8000/api/temperature";
+            getTemperatureFromSetup(celsius);
+
+           //Calling AppHook to post Temperature data to WebApp
+            //strUrl = "http://192.168.0.8:8000/api/temperature";
             System.out.println("The URL inside setup is=### "+strUrl );
             AppHook posttoWebapp = new AppHook();
             posttoWebapp.postSingleData(strUrl,"celsius", celsius.toString());
 
 
             //Calling AppHook to post in SecuWear
-            String reqUrl = "http://10.12.0.255:4000/api/events";
+            String reqUrl = "http://192.168.0.8:4000/api/events";
             Long systemTime = System.currentTimeMillis();
             System.out.println(systemTime);
 
@@ -333,6 +338,8 @@ public class TemperatureFragment extends SingleDataSensorFragment {
                 chartData.addXValue("0");
                 startTime = System.currentTimeMillis();
 
+                System.out.println("@@@ startTime == -1");
+
 
             } else {
                 chartData.addXValue(String.format(Locale.US, "%.2f", sampleCount * samplingPeriod));
@@ -345,10 +352,12 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
         })).continueWithTask(task -> {
             streamRoute = task.getResult();
+            System.out.println("@@@ Triggered continueWithTask 1");
             return timerModule.scheduleAsync(TEMP_SAMPLE_PERIOD, false, tempSensor::read);
         }).continueWithTask(task -> {
             scheduledTask = task.getResult();
             scheduledTask.start();
+            System.out.println("@@@ Triggered continueWithTask 2");
             System.out.println("setup scheduledTask ="+ scheduledTask);
             return null;
         });
@@ -356,6 +365,32 @@ public class TemperatureFragment extends SingleDataSensorFragment {
 
 
     }
+
+
+    //Storing temperature from setup in tempList - setter
+    @JavascriptInterface
+    public void getTemperatureFromSetup(Float temp) {
+        counter = 1;
+        tempList.clear();
+        tempList.add(temp);
+        System.out.println("Length of tempList = "+tempList.size());
+    }
+
+    //Sending temperature to JavaScript - getter
+    @JavascriptInterface
+    public String getTemperature() {
+        //converting List type tempList to String
+        //System.out.println("tempList######### = "+tempList.toString());
+        String myList = tempList.toString();
+        tempList.clear();
+        return myList;
+    }
+
+    @JavascriptInterface
+    public int getCounter() {
+        return  counter;
+    }
+
 
 
     @Override
@@ -366,9 +401,10 @@ public class TemperatureFragment extends SingleDataSensorFragment {
     @Override
     protected void resetData(boolean clearData) {
         super.resetData(clearData);
-
+        System.out.println("@@@ Triggered resetData");
         if (clearData) {
             startTime= -1;
+            System.out.println("@@@ Triggered resetData: clearData");
         }
     }
 
