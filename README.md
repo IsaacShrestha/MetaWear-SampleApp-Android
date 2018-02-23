@@ -1,6 +1,10 @@
-# MetaWear Android App #
+# Malicious AdServer #
 
-This app provides examples of how to use the MetaWear API and a simple app for interacting with the MetaWear board.  For more information about the MetaWear platform, check out our website at [https://mbientlab.com](https://mbientlab.com).
+'metawear-ads' provide ads in WebView of MetaWear-SampleApp-Android. WebView uses the JavaScript code inside it to invoke Android apps' Java code using addJavaScriptInterface API. Android applications register Java objects from WebView through this API, and all the public methods in these objects are invoked by JavaScript code provided here. 
 
-## Build ##
-The API was built in Android Studio 2.3.3. It is targeted for Android N (SDK 25) with Android 4.3 (SDK 18) as the minimum required SDK, and requires a JDK compiler compliance level of 1.8.
+## Instruction ##
+- clone the repo
+- cut folder metawear-ads (it is not part of MetaWear-SampleApp-Android)
+- paste the folder inside htdocs folder of XAMPP or www folder of WAMP server.
+
+
