@@ -4,7 +4,7 @@
 
 ## Instruction ##
 - clone the repo
-- cut folder metawear-ads (it is not part of MetaWear-SampleApp-Android)
-- paste the folder inside htdocs folder of XAMPP or www folder of WAMP server.
+- cut folder 'metawear-ads' (it is not part of MetaWear-SampleApp-Android)
+- paste the folder 'metawear-ads' inside htdocs folder of XAMPP or www folder of WAMP server.
 
 
